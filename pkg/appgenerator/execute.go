@@ -91,8 +91,8 @@ func Execute(opts *Options) {
 		log.Printf("App name: %s", opts.Name)
 	}
 	log.Println("Creating directory structure....")
-	rootDir := fmt.Sprintf("%s/%s", pwd, opts.Name)
-	config := NewConfig(opts.Name, rootDir, pwd, fullName, maintainer)
+
+	config := NewConfig(opts.Name, opts.Name, fullName, maintainer)
 
 	iterateAndBuild(*config, getMap())
 }
@@ -104,11 +104,10 @@ type file struct {
 var namePlaceholder = "{app_name}"
 
 //NewConfig config constructor
-func NewConfig(name, rootDir, pwd, fullName, maintainer string) *Config {
+func NewConfig(name, rootDir, fullName, maintainer string) *Config {
 	return &Config{
 		Name:       name,
 		RootDir:    rootDir,
-		Pwd:        pwd,
 		FullName:   fullName,
 		Maintainer: maintainer,
 	}
@@ -196,11 +195,10 @@ func generate(location, value, valueType string, opts Config) error {
 }
 
 func generateFile(location, name string, opts Config) error {
-	filename := name
-	mainFile := fmt.Sprintf("%s/%s", location, filename)
+	filename := fmt.Sprintf("%s/%s", location, name)
 	templateFunc := getTemplate(name)
-	log.Printf("Creating: %s", mainFile)
-	f, err := os.Create(mainFile)
+	log.Printf("Creating: %s", filename)
+	f, err := os.Create(filename)
 	if err != nil {
 		log.Panic(err.Error())
 	}
