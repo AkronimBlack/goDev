@@ -3,9 +3,17 @@ package templates
 /*MainTemplate stub for cmd/main.go*/
 func MainTemplate() []byte {
 	return []byte(`package main
+  
+import (
+    "github.com/joho/godotenv"
+    "log"
+)
 
 func main() {
-
+    err := godotenv.Load()
+    if err != nil {
+      log.Fatal("Error loading .env file")
+    }
 }
 `)
 }
@@ -13,9 +21,17 @@ func main() {
 /*MainTestTemplate stub for cmd/main.go*/
 func MainTestTemplate() []byte {
 	return []byte(`package main_test
+  
+import (
+  "github.com/joho/godotenv"
+  "log"
+)
 
 func main() {
-
+    err := godotenv.Load(".env.test")
+    if err != nil {
+      log.Fatal("Error loading .env.test file")
+    }
 }
 `)
 }
@@ -92,7 +108,9 @@ func GoModTemplate() []byte {
 	return []byte(`module {{.FullName}}
 
 go 1.15
-	`)
+require (
+    github.com/joho/godotenv v1.3.0
+)`)
 }
 
 /*GoSumTemplate stub for generic docker-compose.yml*/

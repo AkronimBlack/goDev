@@ -18,8 +18,6 @@ const (
 	dockerDir         = "docker"
 	domainDir         = "domain"
 	infrastructureDir = "infrastructure"
-
-	generatorVersion = 0.1
 )
 
 func getMap() map[string]interface{} {
@@ -39,7 +37,6 @@ func getMap() map[string]interface{} {
 		},
 		"docker-compose.yml": nil,
 		"go.mod":             nil,
-		"go.sum":             nil,
 	}
 }
 
@@ -57,16 +54,6 @@ type Options struct {
 
 /*Execute run the app scaffolding builder */
 func Execute(opts *Options) {
-	pwd, err := os.Getwd()
-	if err != nil {
-		log.Println(err.Error())
-		return
-	}
-
-	log.Println("Running appgenerator package")
-	log.Printf("VERSION: %f", generatorVersion)
-	log.Printf("Directory: %s", pwd)
-
 	fullName := opts.Name
 	var maintainer string
 	parts := strings.Split(opts.Name, "/")
