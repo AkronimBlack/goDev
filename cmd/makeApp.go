@@ -16,8 +16,7 @@ limitations under the License.
 package cmd
 
 import (
-	"log"
-
+	"github.com/AkronimBlack/dev-tools/common"
 	"github.com/AkronimBlack/dev-tools/pkg/appgenerator"
 	"github.com/spf13/cobra"
 )
@@ -53,9 +52,7 @@ var makeAppCmd = &cobra.Command{
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		appName, err := cmd.Flags().GetString("app-name")
-		if err != nil {
-			log.Panic(err)
-		}
+		common.PanicOnError(err)
 		appgenerator.Execute(appgenerator.NewOptions(appName))
 	},
 }
