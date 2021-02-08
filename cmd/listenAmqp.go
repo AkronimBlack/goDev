@@ -23,7 +23,7 @@ import (
 
 // listenCmd represents the listen command
 var listenCmd = &cobra.Command{
-	Use:   "listener",
+	Use:   "listen:amqp",
 	Short: "Run listeners on defined topics",
 	Long: `
 	Listens to n topics and prints out messages.
