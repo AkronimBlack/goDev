@@ -187,7 +187,7 @@ func (m *Mailer) Send(subject string, body []byte, to []string) error {
 
 	if m.useAuth {
 		cfg := m.config
-		if cfg.Host == "" || cfg.Port <= 0 {
+		if cfg.Host == "" || cfg.Port <= 0 || cfg.Username == "" || cfg.Password == "" {
 			return fmt.Errorf("username, password, host or port missing")
 		}
 		m.auth = smtp.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)
