@@ -15,22 +15,22 @@ The previous command generates scaffolding for a REST api project. The following
 {app_name}	
 	|-api
 	|   |- openapi
-	|	|- proto
+	|	  |- proto
 	|-application
  	|-cmd
-	|	|-{app_name}
-	|		|- main.go
-	|		|- main_test.go
+	|	   |-{app_name}
+	|		     |- main.go
+	|		     |- main_test.go
 	|-docker
 	|    |- Dockerfile
-	|	 |- Dockerfile.dev
+	|	   |- Dockerfile.dev
 	|-domain
 	|-infrastructure
 	|    |-transport
 	|    |   |- http  
-	|	 |   |- grpc
-	|	 |   |- amqp
-	|	 |-repositories  
+	|	   |   |- grpc
+	|	   |   |- amqp
+	|	   |-repositories  
 	|-docker-compose.yml
 	|-README.md
 	|-.env
