@@ -153,7 +153,6 @@ type Config struct {
 // if FromName not set the first part of FromAddr will be taken. If FromAddr empty and username is given (in the correct format, with an @) then
 // username will be taken as FromAddr
 func NewMailer(cfg Config) *Mailer {
-	//if FromAddr not set but username is and has an @
 	if cfg.FromAddr == "" && cfg.Username != "" && strings.Contains(cfg.Username, "@") {
 		cfg.FromAddr = cfg.Username
 	}
@@ -170,11 +169,19 @@ func NewMailer(cfg Config) *Mailer {
 		Name:    cfg.FromName,
 		Address: cfg.FromAddr,
 	}
+	var auth smtp.Auth
+	if cfg.Auth {
+		if cfg.Username == "" || cfg.Password == "" {
+			common.PanicOnError(fmt.Errorf("username or password missing"))
+		}
+		auth = smtp.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)
+	}
 
 	return &Mailer{
 		config:   cfg,
 		useAuth:  cfg.Auth,
 		fromAddr: fromAddr,
+		auth:     auth,
 	}
 }
 
@@ -208,13 +215,6 @@ func (m *Mailer) Send(subject string, body []byte, to []string) error {
 
 	if m.config.Host == "" || m.config.Port <= 0 {
 		return fmt.Errorf("host or port missing")
-	}
-
-	if m.useAuth {
-		if m.config.Username == "" || m.config.Password == "" {
-			return fmt.Errorf("username or password missing")
-		}
-		m.auth = smtp.PlainAuth("", m.config.Username, m.config.Password, m.config.Host)
 	}
 
 	buffer.WriteString(fmt.Sprintf("%s: %s\r\n", "From", m.fromAddr.String()))
