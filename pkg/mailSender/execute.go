@@ -29,16 +29,31 @@ type Email struct {
 	Error   error
 }
 
+//CallOpts a list of flags
+type CallOpts struct {
+	Filename   string
+	FromName   string
+	FromAddr   string
+	Username   string
+	Password   string
+	Hostname   string
+	Port       int
+	UseAuth    bool
+	Concurrent bool
+	Number     int
+}
+
 //Execute send emails
-func Execute(message, from, username, password, hostname string, auth, concurrent bool, num int) {
-	email := openAndRead(message)
+func Execute(opts CallOpts) {
+	email := openAndRead(opts.Filename)
 	config := Config{
-		Host:     hostname,
-		Username: username,
-		Password: password,
-		FromAddr: from,
-		Port:     25,
-		Auth:     auth,
+		Host:     opts.Hostname,
+		Username: opts.Username,
+		Password: opts.Password,
+		FromAddr: opts.FromAddr,
+		FromName: opts.FromName,
+		Port:     opts.Port,
+		Auth:     opts.UseAuth,
 	}
 	e := make(chan Email)
 
@@ -47,12 +62,12 @@ func Execute(message, from, username, password, hostname string, auth, concurren
 	var counter int
 	start := time.Now()
 
-	for i := 0; i < num; i++ {
+	for i := 0; i < opts.Number; i++ {
 		fmt.Println("Sending email ", i)
-		if concurrent {
-			go sendMail(from, email, config, e)
+		if opts.Concurrent {
+			go sendMail(email, config, e)
 		} else {
-			rMail, err := sendMail(from, email, config, nil)
+			rMail, err := sendMail(email, config, nil)
 			if err != nil {
 				fmt.Println("Sent email err: ")
 				fmt.Println(rMail)
@@ -67,7 +82,7 @@ func Execute(message, from, username, password, hostname string, auth, concurren
 		}
 
 	}
-	if concurrent {
+	if opts.Concurrent {
 		for {
 			select {
 			case rEmail := <-e:
@@ -86,15 +101,15 @@ func Execute(message, from, username, password, hostname string, auth, concurren
 					s = s + 1
 				}
 
-				if counter == num {
-					fmt.Printf("%d mails sent in %d ms. Successful: %d | Failed: %d", num, time.Now().Sub(start).Milliseconds(), s, f)
+				if counter == opts.Number {
+					fmt.Printf("%d mails sent in %d ms. Successful: %d | Failed: %d", opts.Number, time.Now().Sub(start).Milliseconds(), s, f)
 					return
 				}
 			}
 		}
 	}
 
-	fmt.Printf("%d mails sent in %d ms. Successful: %d | Failed: %d", num, time.Now().Sub(start).Milliseconds(), s, f)
+	fmt.Printf("%d mails sent in %d ms. Successful: %d | Failed: %d", opts.Number, time.Now().Sub(start).Milliseconds(), s, f)
 
 }
 
@@ -111,7 +126,7 @@ func openAndRead(message string) Email {
 	return email
 }
 
-func sendMail(from string, email Email, config Config, e chan Email) (Email, error) {
+func sendMail(email Email, config Config, e chan Email) (Email, error) {
 	mailSender := NewMailer(config)
 	email.Error = mailSender.Send(common.ReplacePlaceholder(email.Subject), []byte(common.ReplacePlaceholder(email.Body)), email.To)
 	if e != nil {
@@ -120,41 +135,47 @@ func sendMail(from string, email Email, config Config, e chan Email) (Email, err
 	return email, nil
 }
 
-//Config ....
+// Config ....
+// Host is the server mail host, IP or address. Port is the listening port.
+// Username and Passwordare required if auth set to true.
+// FromName and FromAddr are standard mailing values and are in the format of FromName: AkronimBlack FromAddr: akronimBlack@hostname.com
 type Config struct {
-	// Host is the server mail host, IP or address.
-	Host string
-	// Port is the listening port.
-	Port int
-	// Username is the auth username@domain.com for the sender.
+	Host     string
+	Port     int
 	Username string
-	// Password is the auth password for the sender.
 	Password string
-	// FromAddr is the 'from' part of the mail header, it overrides the username.
 	FromAddr string
-	// FromAlias is the from part, if empty this is the first part before @ from the Username field.
-	FromAlias string
-	Auth      bool
+	FromName string
+	Auth     bool
 }
 
 // NewMailer creates and returns a new mail sender.
+// if FromName not set the first part of FromAddr will be taken. If FromAddr empty and username is given (in the correct format, with an @) then
+// username will be taken as FromAddr
 func NewMailer(cfg Config) *Mailer {
-	m := &Mailer{config: cfg}
-	addr := cfg.FromAddr
-	if addr == "" {
-		addr = cfg.Username
+	//if FromAddr not set but username is and has an @
+	if cfg.FromAddr == "" && cfg.Username != "" && strings.Contains(cfg.Username, "@") {
+		cfg.FromAddr = cfg.Username
 	}
 
-	if cfg.FromAlias == "" {
-		if cfg.Username != "" && strings.Contains(cfg.Username, "@") {
-			m.fromAddr = mail.Address{Name: cfg.Username[0:strings.IndexByte(cfg.Username, '@')], Address: addr}
-		}
-	} else {
-		m.fromAddr = mail.Address{Name: cfg.FromAlias, Address: addr}
+	if cfg.FromName == "" && cfg.FromAddr != "" {
+		cfg.FromName = cfg.Username[0:strings.IndexByte(cfg.FromAddr, '@')]
 	}
-	m.useAuth = cfg.Auth
 
-	return m
+	if cfg.FromAddr == "" || cfg.FromName == "" {
+		common.PanicOnError(fmt.Errorf("Missing from address or from alias"))
+	}
+
+	fromAddr := mail.Address{
+		Name:    cfg.FromName,
+		Address: cfg.FromAddr,
+	}
+
+	return &Mailer{
+		config:   cfg,
+		useAuth:  cfg.Auth,
+		fromAddr: fromAddr,
+	}
 }
 
 //Mailer struct
@@ -185,21 +206,22 @@ func (m *Mailer) Send(subject string, body []byte, to []string) error {
 	buffer := bufPool.Get()
 	defer bufPool.Put(buffer)
 
-	if m.useAuth {
-		cfg := m.config
-		if cfg.Host == "" || cfg.Port <= 0 || cfg.Username == "" || cfg.Password == "" {
-			return fmt.Errorf("username, password, host or port missing")
-		}
-		m.auth = smtp.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)
+	if m.config.Host == "" || m.config.Port <= 0 {
+		return fmt.Errorf("host or port missing")
 	}
 
-	fullhost := fmt.Sprintf("%s:%d", m.config.Host, m.config.Port)
+	if m.useAuth {
+		if m.config.Username == "" || m.config.Password == "" {
+			return fmt.Errorf("username or password missing")
+		}
+		m.auth = smtp.PlainAuth("", m.config.Username, m.config.Password, m.config.Host)
+	}
 
 	buffer.WriteString(fmt.Sprintf("%s: %s\r\n", "From", m.fromAddr.String()))
 	writeHeaders(buffer, subject, body, to)
 
 	return smtp.SendMail(
-		fmt.Sprintf(fullhost),
+		fmt.Sprintf(fmt.Sprintf("%s:%d", m.config.Host, m.config.Port)),
 		m.auth,
 		m.config.Username,
 		to,

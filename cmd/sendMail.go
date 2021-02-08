@@ -66,22 +66,37 @@ var sendMailCmd = &cobra.Command{
 	}
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		message, err := cmd.Flags().GetString("message")
-		num, err := cmd.Flags().GetInt("num")
-		from, err := cmd.Flags().GetString("from")
+		filename, err := cmd.Flags().GetString("filename")
+		fromName, err := cmd.Flags().GetString("fromName")
+		fromAddr, err := cmd.Flags().GetString("fromAddr")
+		hostname, err := cmd.Flags().GetString("hostname")
+		port, err := cmd.Flags().GetInt("port")
+
+		username, err := cmd.Flags().GetString("username")
+		password, err := cmd.Flags().GetString("password")
 		auth, err := cmd.Flags().GetBool("auth")
 		concurrent, err := cmd.Flags().GetBool("concurrent")
-		hostname, err := cmd.Flags().GetString("hostname")
-		username, err := cmd.Flags().GetString("hostname")
-		password, err := cmd.Flags().GetString("password")
+		num, err := cmd.Flags().GetInt("num")
 		common.PanicOnError(err)
-		sender.Execute(message, from, username, password, hostname, auth, concurrent, num)
+		sender.Execute(sender.CallOpts{
+			Filename:   filename,
+			FromName:   fromName,
+			FromAddr:   fromAddr,
+			Hostname:   hostname,
+			Port:       port,
+			Username:   username,
+			Password:   password,
+			UseAuth:    auth,
+			Number:     num,
+			Concurrent: concurrent,
+		})
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(sendMailCmd)
-	sendMailCmd.Flags().StringP("from", "q", "", "Set mail sender")
+	sendMailCmd.Flags().StringP("fromName", "q", "", "Set mail sender name")
+	sendMailCmd.Flags().StringP("fromAddr", "y", "", "Set mail sender addres")
 	sendMailCmd.Flags().BoolP("auth", "a", false, "Auth required")
 	sendMailCmd.Flags().BoolP("concurrent", "x", true, "Run in concurrent mod")
 
@@ -89,10 +104,11 @@ func init() {
 	sendMailCmd.Flags().StringP("password", "p", "admin", "password")
 
 	sendMailCmd.Flags().StringP("hostname", "z", "127.0.0.1", "host to connect to")
+	sendMailCmd.Flags().IntP("port", "g", 22, "port")
 
-	sendMailCmd.Flags().StringP("message", "f", "", "Use this config.json file to build and send message")
+	sendMailCmd.Flags().StringP("filename", "f", "", "Use this config.json file to build and send filename")
 	sendMailCmd.Flags().IntP("num", "n", 1, "Number of massages to be sent")
-	sendMailCmd.MarkFlagRequired("from")
+	sendMailCmd.MarkFlagRequired("fromAddr")
 	sendMailCmd.MarkFlagRequired("hostname")
-	sendMailCmd.MarkFlagRequired("message")
+	sendMailCmd.MarkFlagRequired("filename")
 }
