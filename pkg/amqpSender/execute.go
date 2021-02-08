@@ -1,18 +1,14 @@
-package sender
+package amqpsender
 
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
-	"reflect"
-	"strings"
 
 	"github.com/AkronimBlack/dev-tools/common"
 	"github.com/Azure/go-amqp"
-	"github.com/bxcodec/faker"
 )
 
 //SendMessages ....
@@ -79,11 +75,11 @@ func interateAndBuild(data map[string]interface{}) map[string]interface{} {
 		newMap[i] = v
 		switch newMap[i].(type) {
 		case string:
-			newMap[i] = convertString(newMap[i].(string))
+			newMap[i] = common.ReplacePlaceholder(newMap[i].(string))
 		case map[string]string:
 			castValue := newMap[i].(map[string]string)
 			for j, k := range castValue {
-				castValue[j] = convertString(k)
+				castValue[j] = common.ReplacePlaceholder(k)
 			}
 			newMap[i] = castValue
 		case map[string]interface{}:
@@ -93,35 +89,6 @@ func interateAndBuild(data map[string]interface{}) map[string]interface{} {
 		}
 	}
 	return newMap
-}
-
-func trimExcessFat(value string, left string, right string) string {
-	stringValue := strings.TrimLeft(value, left)
-	stringValue = strings.TrimRight(stringValue, right)
-	return stringValue
-}
-
-func convertString(value string) string {
-	if strings.Contains(value, "{{") {
-		val := trimExcessFat(value, "{{", "}}")
-		splitData := strings.Split(val, ".")
-		if splitData[0] == "faker" {
-			return newFaked(splitData[1])
-		}
-	}
-	return value
-}
-
-func newFaked(key string) string {
-	v := FakerOptions{}
-	err := faker.FakeData(&v)
-	if err != nil {
-		log.Println("Problem faking data")
-		fmt.Println(err)
-	}
-	rv := reflect.ValueOf(v)
-	fv := rv.FieldByName(key)
-	return fv.String()
 }
 
 func NewMessage(data []byte, props map[string]interface{}) *amqp.Message {
@@ -135,33 +102,4 @@ func NewMessage(data []byte, props map[string]interface{}) *amqp.Message {
 type EventMessage struct {
 	Payload               map[string]interface{} `json:"payload"`
 	ApplicationProperties map[string]interface{} `json:"properties"`
-}
-
-type FakerOptions struct {
-	Email           string `faker:"email"`
-	PhoneNumber     string `faker:"phone_number"`
-	URL             string `faker:"url"`
-	UserName        string `faker:"username"`
-	TitleMale       string `faker:"title_male"`
-	TitleFemale     string `faker:"title_female"`
-	FirstName       string `faker:"first_name"`
-	FirstNameMale   string `faker:"first_name_male"`
-	FirstNameFemale string `faker:"first_name_female"`
-	LastName        string `faker:"last_name"`
-	Name            string `faker:"name"`
-	Date            string `faker:"date"`
-	Time            string `faker:"time"`
-	MonthName       string `faker:"month_name"`
-	Year            string `faker:"year"`
-	DayOfWeek       string `faker:"day_of_week"`
-	DayOfMonth      string `faker:"day_of_month"`
-	Timestamp       string `faker:"timestamp"`
-	Century         string `faker:"century"`
-	TimeZone        string `faker:"timezone"`
-	TimePeriod      string `faker:"time_period"`
-	Word            string `faker:"word"`
-	Sentence        string `faker:"sentence"`
-	Paragraph       string `faker:"paragraph"`
-	Currency        string `faker:"currency"`
-	UUID            string `faker:"uuid_digit"`
 }

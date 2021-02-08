@@ -17,7 +17,7 @@ package cmd
 
 import (
 	"github.com/AkronimBlack/dev-tools/common"
-	"github.com/AkronimBlack/dev-tools/pkg/listener"
+	listener "github.com/AkronimBlack/dev-tools/pkg/amqpListener"
 	"github.com/spf13/cobra"
 )
 

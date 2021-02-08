@@ -17,15 +17,16 @@ package cmd
 
 import (
 	"github.com/AkronimBlack/dev-tools/common"
-	sender "github.com/AkronimBlack/dev-tools/pkg/amqpSender"
+	sender "github.com/AkronimBlack/dev-tools/pkg/mailSender"
 	"github.com/spf13/cobra"
 )
 
-// sendCmd represents the send command
-var sendCmd = &cobra.Command{
-	Use:   "send:amqp",
-	Short: "Send a message to a defined topics",
-	Long: `Read from a defined .json file, compose message and send it to event bus.
+// sendMailCmd represents the sendMail command
+var sendMailCmd = &cobra.Command{
+	Use:   "send:mail",
+	Short: "Send an email",
+	Long: `Service to send an x number of email to y number of contacts z number of times. Offers faking data as well.
+	Read from a defined .json file, compose message and send it to event bus.
 	Available faker options for making messages. 	
 
 	Email           string
@@ -59,44 +60,39 @@ var sendCmd = &cobra.Command{
 	Payload section should be in map[string]interface{} format and you can use faker wherever as log as it is a value and not a key
 	Example:
 	{
-		"payload": {
-			"email_subject": "{{faker.Sentence}}",
-			"email_body": "{{faker.Paragraph}}",
-			"test":{
-				"some key":"{{faker.Name}}",
-				"some key2":{
-					"once more":"{{faker.Name}}"
-				}
-			}
-		},
-		"properties": {
-			"message-name": "trigger-process",
-			"sampleKey": "{{faker.UUID}}"
-		}
+		"subject": "{{faker.Sentence}}",
+		"body":"{{faker.Paragraph}}",
+		"to":["someEmail@email.com","someEmail2@email.com"]
 	}
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		hostname, err := cmd.Flags().GetString("hostname")
-		port, err := cmd.Flags().GetString("port")
-		username, err := cmd.Flags().GetString("username")
-		password, err := cmd.Flags().GetString("password")
-		topics, err := cmd.Flags().GetStringSlice("topics")
-		filename, err := cmd.Flags().GetString("message")
+		message, err := cmd.Flags().GetString("message")
 		num, err := cmd.Flags().GetInt("num")
+		from, err := cmd.Flags().GetString("from")
+		auth, err := cmd.Flags().GetBool("auth")
+		concurrent, err := cmd.Flags().GetBool("concurrent")
+		hostname, err := cmd.Flags().GetString("hostname")
+		username, err := cmd.Flags().GetString("hostname")
+		password, err := cmd.Flags().GetString("password")
 		common.PanicOnError(err)
-		sender.SendMessages(hostname, port, filename, username, password, topics, num)
+		sender.Execute(message, from, username, password, hostname, auth, concurrent, num)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(sendCmd)
-	sendCmd.PersistentFlags().StringP("username", "u", "admin", "username")
-	sendCmd.PersistentFlags().StringP("password", "p", "admin", "password")
-	sendCmd.PersistentFlags().StringP("hostname", "z", "127.0.0.1", "host to connect to")
-	sendCmd.PersistentFlags().StringP("port", "r", "5672", "port to connect to")
-	sendCmd.PersistentFlags().StringSliceP("topics", "t", nil, "List of topics to send to")
-	sendCmd.PersistentFlags().StringP("message", "f", "", "Use this message file to build and send message")
-	sendCmd.PersistentFlags().IntP("num", "n", 1, "Number of masseges to be sent")
+	rootCmd.AddCommand(sendMailCmd)
+	sendMailCmd.Flags().StringP("from", "q", "", "Set mail sender")
+	sendMailCmd.Flags().BoolP("auth", "a", false, "Auth required")
+	sendMailCmd.Flags().BoolP("concurrent", "x", true, "Run in concurrent mod")
 
-	sendCmd.MarkFlagRequired("topics")
+	sendMailCmd.Flags().StringP("username", "u", "admin", "username")
+	sendMailCmd.Flags().StringP("password", "p", "admin", "password")
+
+	sendMailCmd.Flags().StringP("hostname", "z", "127.0.0.1", "host to connect to")
+
+	sendMailCmd.Flags().StringP("message", "f", "", "Use this config.json file to build and send message")
+	sendMailCmd.Flags().IntP("num", "n", 1, "Number of masseges to be sent")
+	sendMailCmd.MarkFlagRequired("from")
+	sendMailCmd.MarkFlagRequired("hostname")
+	sendMailCmd.MarkFlagRequired("message")
 }
