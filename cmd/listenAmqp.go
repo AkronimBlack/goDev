@@ -30,11 +30,11 @@ var listenCmd = &cobra.Command{
 	NOTE: Text payload represents STOMP messages and BINARY for amqp messages
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		hostname, err := rootCmd.Flags().GetString("hostname")
-		port, err := rootCmd.Flags().GetString("port")
-		username, err := rootCmd.Flags().GetString("username")
-		password, err := rootCmd.Flags().GetString("password")
-		topics, err := rootCmd.Flags().GetStringSlice("topics")
+		hostname, err := cmd.Flags().GetString("hostname")
+		port, err := cmd.Flags().GetString("port")
+		username, err := cmd.Flags().GetString("username")
+		password, err := cmd.Flags().GetString("password")
+		topics, err := cmd.Flags().GetStringSlice("topics")
 		common.PanicOnError(err)
 		listener.LaunchListener(hostname, port, username, password, topics)
 	},
