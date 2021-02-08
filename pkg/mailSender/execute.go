@@ -113,8 +113,7 @@ func openAndRead(message string) Email {
 
 func sendMail(from string, email Email, config Config, e chan Email) (Email, error) {
 	mailSender := NewMailer(config)
-	err := mailSender.Send(common.ReplacePlaceholder(email.Subject), []byte(common.ReplacePlaceholder(email.Body)), email.To)
-	email.Error = err
+	email.Error = mailSender.Send(common.ReplacePlaceholder(email.Subject), []byte(common.ReplacePlaceholder(email.Body)), email.To)
 	if e != nil {
 		e <- email
 	}
@@ -160,11 +159,10 @@ func NewMailer(cfg Config) *Mailer {
 
 //Mailer struct
 type Mailer struct {
-	config        Config
-	fromAddr      mail.Address
-	auth          smtp.Auth
-	authenticated bool
-	useAuth       bool
+	config   Config
+	fromAddr mail.Address
+	auth     smtp.Auth
+	useAuth  bool
 }
 
 type stringWriter interface {
@@ -187,13 +185,12 @@ func (m *Mailer) Send(subject string, body []byte, to []string) error {
 	buffer := bufPool.Get()
 	defer bufPool.Put(buffer)
 
-	if !m.authenticated && m.useAuth {
+	if m.useAuth {
 		cfg := m.config
 		if cfg.Host == "" || cfg.Port <= 0 {
 			return fmt.Errorf("username, password, host or port missing")
 		}
 		m.auth = smtp.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)
-		m.authenticated = true
 	}
 
 	fullhost := fmt.Sprintf("%s:%d", m.config.Host, m.config.Port)

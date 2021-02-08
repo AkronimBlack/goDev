@@ -96,7 +96,7 @@ func init() {
 	sendCmd.PersistentFlags().StringP("port", "r", "5672", "port to connect to")
 	sendCmd.PersistentFlags().StringSliceP("topics", "t", nil, "List of topics to send to")
 	sendCmd.PersistentFlags().StringP("message", "f", "", "Use this message file to build and send message")
-	sendCmd.PersistentFlags().IntP("num", "n", 1, "Number of masseges to be sent")
+	sendCmd.PersistentFlags().IntP("num", "n", 1, "Number of massages to be sent")
 
 	sendCmd.MarkFlagRequired("topics")
 }

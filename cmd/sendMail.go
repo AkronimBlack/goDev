@@ -91,7 +91,7 @@ func init() {
 	sendMailCmd.Flags().StringP("hostname", "z", "127.0.0.1", "host to connect to")
 
 	sendMailCmd.Flags().StringP("message", "f", "", "Use this config.json file to build and send message")
-	sendMailCmd.Flags().IntP("num", "n", 1, "Number of masseges to be sent")
+	sendMailCmd.Flags().IntP("num", "n", 1, "Number of massages to be sent")
 	sendMailCmd.MarkFlagRequired("from")
 	sendMailCmd.MarkFlagRequired("hostname")
 	sendMailCmd.MarkFlagRequired("message")
