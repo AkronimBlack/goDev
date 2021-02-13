@@ -54,32 +54,12 @@ type Options struct {
 
 /*Execute run the app scaffolding builder */
 func Execute(opts *Options) {
-	fullName := opts.Name
-	var maintainer string
-	parts := strings.Split(opts.Name, "/")
-	if len(parts) > 1 {
-		opts.Name = parts[len(parts)-1]
-	}
-	if len(parts) == 3 {
-		maintainer = parts[1]
-	}
+	nameData := common.ExtractNameData(common.SanitizeName(opts.Name))
+	log.Println("--------------------------------------")
+	log.Println(nameData.ProjectName)
+	config := NewConfig(nameData.ProjectName, nameData.ProjectName, opts.Name, nameData.Maintainer)
 
-	if strings.Contains(opts.Name, " ") {
-		log.Println("Whitespace detected. Cleaning up app name ...")
-		components := strings.Split(opts.Name, " ")
-		for i, v := range components {
-			if i == 0 {
-				v = strings.ToLower(v)
-				continue
-			}
-			v = strings.Title(strings.ToLower(v))
-		}
-		opts.Name = strings.Join(components, "")
-		log.Printf("App name: %s", opts.Name)
-	}
-	log.Println("Creating directory structure....")
-
-	config := NewConfig(opts.Name, opts.Name, fullName, maintainer)
+	log.Println(config)
 
 	iterateAndBuild(*config, getMap())
 }

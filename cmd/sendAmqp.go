@@ -99,4 +99,5 @@ func init() {
 	sendCmd.PersistentFlags().IntP("num", "n", 1, "Number of massages to be sent")
 
 	sendCmd.MarkFlagRequired("topics")
+	sendCmd.MarkFlagRequired("message")
 }
