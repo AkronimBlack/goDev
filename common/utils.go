@@ -1,6 +1,7 @@
 package common
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"reflect"
@@ -73,4 +74,12 @@ func trimExcessFat(value string, left string, right string) string {
 	stringValue := strings.TrimLeft(value, left)
 	stringValue = strings.TrimRight(stringValue, right)
 	return stringValue
+}
+
+func LogJson(v interface{}) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		log.Panic(err.Error())
+	}
+	log.Println(string(b))
 }

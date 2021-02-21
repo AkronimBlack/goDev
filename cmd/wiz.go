@@ -18,6 +18,8 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/AkronimBlack/dev-tools/common"
+	"github.com/AkronimBlack/dev-tools/pkg/wizard"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 )
@@ -26,15 +28,11 @@ import (
 var wizCmd = &cobra.Command{
 	Use:   "wiz",
 	Short: "Scaffold generation wizard",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long:  `Add-on to the scaffold generator that will let you customize your generated project.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		answers := struct {
-			ProjectName string `json:"projectName"`
+			ProjectName   string `json:"project_name"`
+			HTTPFramework string `survey:"http_framework" json:"http_framework"`
 		}{}
 
 		// perform the questions
@@ -43,30 +41,29 @@ to quickly create a Cobra application.`,
 			fmt.Println(err.Error())
 			return
 		}
-
+		common.LogJson(answers)
+		nameData := common.ExtractNameData(common.SanitizeName(answers.ProjectName))
+		wizard.Execute(wizard.NewOptions(nameData.ProjectName, nameData.Maintainer, nameData.Platform, answers.ProjectName))
 	},
 }
 
 // the questions to ask
 var qs = []*survey.Question{
 	{
-		Name:      "projectName",
-		Prompt:    &survey.Input{Message: "Your project name?"},
-		Validate:  survey.Required,
-		Transform: survey.Title,
+		Name:     "projectName",
+		Prompt:   &survey.Input{Message: "Your project name?"},
+		Validate: survey.Required,
+	},
+	{
+		Name: "http_framework",
+		Prompt: &survey.Select{
+			Message: "Choose a http framework:",
+			Options: wizard.HTTPFrameforks(),
+			Default: wizard.DefaultHTTPFramefork(),
+		},
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(wizCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// wizCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// wizCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

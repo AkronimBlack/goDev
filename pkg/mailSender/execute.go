@@ -71,14 +71,13 @@ func Execute(opts CallOpts) {
 			if err != nil {
 				fmt.Println("Sent email err: ")
 				fmt.Println(rMail)
-				counter = counter + 1
-				f = f + 1
+				f++
 			} else {
 				fmt.Println("Sent email : ")
 				fmt.Println(rMail)
-				counter = counter + 1
-				s = s + 1
+				s++
 			}
+			counter++
 		}
 
 	}
@@ -88,17 +87,15 @@ func Execute(opts CallOpts) {
 			case rEmail := <-e:
 				fmt.Println("Sent email err: ")
 				fmt.Println(rEmail)
-				counter = counter + 1
+				counter++
 				if rEmail.Error != nil {
 					fmt.Println("Sent email err: ")
 					fmt.Println(rEmail)
-					counter = counter + 1
-					f = f + 1
+					f++
 				} else {
 					fmt.Println("Sent email : ")
 					fmt.Println(rEmail)
-					counter = counter + 1
-					s = s + 1
+					s++
 				}
 
 				if counter == opts.Number {

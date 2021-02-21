@@ -118,3 +118,47 @@ func GoSumTemplate() []byte {
 	return []byte(`
 	`)
 }
+
+/*GinTemplate stub for generic gin main.go file*/
+func GinTemplate() []byte {
+	return []byte(`package main
+
+import (
+  "github.com/gin-contrib/cors"
+  "github.com/gin-gonic/gin"
+)
+  
+func main() {
+  router = gin.New()
+
+	router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
+		return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
+			param.ClientIP,
+			param.TimeStamp.Format(time.RFC1123),
+			param.Method,
+			param.Path,
+			param.Request.Proto,
+			param.StatusCode,
+			param.Latency,
+			param.Request.UserAgent(),
+			param.ErrorMessage,
+		)
+	}))
+	router.Use(gin.Recovery())
+
+	config := cors.Config{
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}
+	config.AllowAllOrigins = true
+	router.Use(cors.Default())
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+  router.Run(":8080")
+}
+`)
+}
