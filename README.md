@@ -6,7 +6,7 @@ A toolbox for golang development and testing
 ## Code generation
 
 ```
-dev-tools make:app -n=github.com/AkronimBlack/project
+stock make:app -n=github.com/AkronimBlack/project
 ```
 
 The previous command generates scaffolding for a REST api project. The following is made:
