@@ -16,8 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/AkronimBlack/dev-tools/common"
-	sender "github.com/AkronimBlack/dev-tools/pkg/mailSender"
+	"github.com/AkronimBlack/stock/common"
+	sender "github.com/AkronimBlack/stock/pkg/mailSender"
 	"github.com/spf13/cobra"
 )
 

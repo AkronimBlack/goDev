@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/AkronimBlack/dev-tools/common"
+	"github.com/AkronimBlack/stock/common"
 	"github.com/valyala/bytebufferpool"
 )
 

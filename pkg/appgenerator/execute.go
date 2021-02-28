@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/AkronimBlack/dev-tools/common"
-	"github.com/AkronimBlack/dev-tools/pkg/templates"
+	"github.com/AkronimBlack/stock/common"
+	"github.com/AkronimBlack/stock/pkg/templates"
 )
 
 const (

@@ -29,7 +29,7 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "dev-tools",
+	Use:   "stock",
 	Short: "Development tools to help with microservice development and tools usage",
 	Long: `Tools that are supported:
 	`,
@@ -61,9 +61,9 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".dev-tools" (without extension).
+		// Search config in home directory with name ".stock" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".dev-tools")
+		viper.SetConfigName(".stock")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
