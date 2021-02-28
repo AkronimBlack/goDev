@@ -43,7 +43,7 @@ var wizCmd = &cobra.Command{
 		}
 		common.LogJson(answers)
 		nameData := common.ExtractNameData(common.SanitizeName(answers.ProjectName))
-		wizard.Execute(wizard.NewOptions(nameData.ProjectName, nameData.Maintainer, nameData.Platform, answers.ProjectName))
+		wizard.Execute(wizard.NewOptions(nameData.ProjectName, nameData.Maintainer, answers.HTTPFramework, answers.ProjectName))
 	},
 }
 

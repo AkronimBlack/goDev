@@ -124,12 +124,17 @@ func GinTemplate() []byte {
 	return []byte(`package main
 
 import (
+	"fmt"
+	"log"
+	"time"
+
   "github.com/gin-contrib/cors"
   "github.com/gin-gonic/gin"
+  "github.com/joho/godotenv"
 )
   
 func main() {
-  router = gin.New()
+  router := gin.New()
 
 	router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 		return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
@@ -158,7 +163,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-  router.Run(":8080")
+  log.Fatal(router.Run(":8080"))
 }
 `)
 }
