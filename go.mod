@@ -1,4 +1,4 @@
-module github.com/AkronimBlack/dev-tools
+module github.com/AkronimBlack/stock
 
 go 1.15
 
