@@ -16,8 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/AkronimBlack/dev-tools/common"
-	listener "github.com/AkronimBlack/dev-tools/pkg/amqpListener"
+	"github.com/AkronimBlack/stock/common"
+	listener "github.com/AkronimBlack/stock/pkg/amqpListener"
 	"github.com/spf13/cobra"
 )
 

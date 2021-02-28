@@ -18,8 +18,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/AkronimBlack/dev-tools/common"
-	"github.com/AkronimBlack/dev-tools/pkg/wizard"
+	"github.com/AkronimBlack/stock/common"
+	"github.com/AkronimBlack/stock/pkg/wizard"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 )

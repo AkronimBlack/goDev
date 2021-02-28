@@ -16,8 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/AkronimBlack/dev-tools/common"
-	"github.com/AkronimBlack/dev-tools/pkg/appgenerator"
+	"github.com/AkronimBlack/stock/common"
+	"github.com/AkronimBlack/stock/pkg/appgenerator"
 	"github.com/spf13/cobra"
 )
 

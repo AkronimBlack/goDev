@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/AkronimBlack/dev-tools/common"
+	"github.com/AkronimBlack/stock/common"
 	"github.com/Azure/go-amqp"
 )
 
