@@ -21,17 +21,20 @@ var templateMap = map[string]func() []byte{
 	"Dockerfile.dev":     templates.DockerfileDevTemplate,
 	"docker-compose.yml": templates.DockerComposeTemplate,
 	"go.mod":             goModTemplate,
+	".env":               templates.EnvTemplate,
+	".env.example":       templates.EnvTemplate,
+	".gitignore":         templates.GitIgnoreTemplate,
 }
 
 var executeOptions *Options
 
-//HTTPFrameforks list of available framework templates
-func HTTPFrameforks() []string {
+//HTTPFrameworks list of available framework templates
+func HTTPFrameworks() []string {
 	return []string{ginFramework, gorillaFramework, noFramework}
 }
 
-//DefaultHTTPFramefork list of available framework templates
-func DefaultHTTPFramefork() string {
+//DefaultHTTPFramework list of available framework templates
+func DefaultHTTPFramework() string {
 	return ginFramework
 }
 
@@ -102,42 +105,42 @@ func getObjectMap() []*appgenerator.Object {
 	return []*appgenerator.Object{
 		{
 			Name: appgenerator.NamePlaceholder,
-			Type: "dir",
+			Type: appgenerator.TypeDir,
 			SubObjects: []*appgenerator.Object{
 				{
 					Name: "api",
-					Type: "dir",
+					Type: appgenerator.TypeDir,
 					SubObjects: []*appgenerator.Object{
 						{
 							Name: "openapi",
-							Type: "dir",
+							Type: appgenerator.TypeDir,
 						},
 						{
 							Name: "proto",
-							Type: "dir",
+							Type: appgenerator.TypeDir,
 						},
 					},
 				},
 				{
 					Name: "application",
-					Type: "dir",
+					Type: appgenerator.TypeDir,
 				},
 				{
 					Name: "cmd",
-					Type: "dir",
+					Type: appgenerator.TypeDir,
 					SubObjects: []*appgenerator.Object{
 						{
 							Name: appgenerator.NamePlaceholder,
-							Type: "dir",
+							Type: appgenerator.TypeDir,
 							SubObjects: []*appgenerator.Object{
 								{
 									Name:     "main.go",
-									Type:     "file",
+									Type:     appgenerator.TypeFile,
 									Template: getTemplate("main.go"),
 								},
 								{
 									Name:     "main_test.go",
-									Type:     "file",
+									Type:     appgenerator.TypeFile,
 									Template: getTemplate("main_test.go"),
 								},
 							},
@@ -146,61 +149,76 @@ func getObjectMap() []*appgenerator.Object {
 				},
 				{
 					Name: "docker",
-					Type: "dir",
+					Type: appgenerator.TypeDir,
 					SubObjects: []*appgenerator.Object{
 						{
 							Name:     "Dockerfile",
-							Type:     "file",
+							Type:     appgenerator.TypeFile,
 							Template: getTemplate("Dockerfile"),
 						},
 						{
 							Name:     "Dockerfile.dev",
-							Type:     "file",
+							Type:     appgenerator.TypeFile,
 							Template: getTemplate("Dockerfile.dev"),
 						},
 					},
 				},
 				{
 					Name: "domain",
-					Type: "dir",
+					Type: appgenerator.TypeDir,
 				},
 				{
 					Name: "infrastructure",
-					Type: "dir",
+					Type: appgenerator.TypeDir,
 					SubObjects: []*appgenerator.Object{
 						{
 							Name: "transport",
-							Type: "dir",
+							Type: appgenerator.TypeDir,
 							SubObjects: []*appgenerator.Object{
 								{
 									Name: "http",
-									Type: "dir",
+									Type: appgenerator.TypeDir,
 								},
 								{
 									Name: "grpc",
-									Type: "dir",
+									Type: appgenerator.TypeDir,
 								},
 								{
 									Name: "amqp",
-									Type: "dir",
+									Type: appgenerator.TypeDir,
 								},
 							},
 						},
 						{
 							Name: "repositories",
-							Type: "dir",
+							Type: appgenerator.TypeDir,
 						},
 					},
 				},
 				{
 					Name:     "docker-compose.yml",
-					Type:     "file",
+					Type:     appgenerator.TypeFile,
 					Template: getTemplate("docker-compose.yml"),
 				},
 				{
 					Name:     "go.mod",
-					Type:     "file",
+					Type:     appgenerator.TypeFile,
 					Template: getTemplate("go.mod"),
+				},
+				{
+					Name:     ".env",
+					Type:     appgenerator.TypeFile,
+					Template: getTemplate(".env"),
+				},
+				{
+					Name:     ".env.example",
+					Type:     appgenerator.TypeFile,
+					Template: getTemplate(".env"),
+				},
+				{
+					Name:     ".gitignore",
+					Type:     appgenerator.TypeFile,
+					Template: getTemplate(".gitignore"),
 				},
 			},
 		},
