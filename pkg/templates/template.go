@@ -38,8 +38,7 @@ func main() {
 
 /*DockerComposeTemplate stub for generic docker-compose.yml*/
 func DockerComposeTemplate() []byte {
-	return []byte(`
-version: '3.3'
+	return []byte(`version: '3.3'
 
 services:
    {{.Name}}:
@@ -166,4 +165,17 @@ func main() {
   log.Fatal(router.Run(":8080"))
 }
 `)
+}
+
+func EnvTemplate() []byte {
+	return []byte(`HOST=0.0.0.0
+PORT=8080`)
+}
+
+func GitIgnoreTemplate() []byte {
+	return []byte(`.vscode
+.idea
+/logs
+/vendor
+.env`)
 }

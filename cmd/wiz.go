@@ -58,8 +58,8 @@ var qs = []*survey.Question{
 		Name: "http_framework",
 		Prompt: &survey.Select{
 			Message: "Choose a http framework:",
-			Options: wizard.HTTPFrameforks(),
-			Default: wizard.DefaultHTTPFramefork(),
+			Options: wizard.HTTPFrameworks(),
+			Default: wizard.DefaultHTTPFramework(),
 		},
 	},
 }

@@ -12,12 +12,8 @@ import (
 )
 
 const (
-	apiDr             = "api"
-	applicationDir    = "application"
-	cmdDir            = "cmd"
-	dockerDir         = "docker"
-	domainDir         = "domain"
-	infrastructureDir = "infrastructure"
+	TypeFile = "file"
+	TypeDir  = "dir"
 	//NamePlaceholder is a string the builder will look for and replace with name of full-name of the project
 	NamePlaceholder = "{app_name}"
 )
@@ -66,42 +62,42 @@ func getObjectMap() []*Object {
 	return []*Object{
 		{
 			Name: NamePlaceholder,
-			Type: "dir",
+			Type: TypeDir,
 			SubObjects: []*Object{
 				{
 					Name: "api",
-					Type: "dir",
+					Type: TypeDir,
 					SubObjects: []*Object{
 						{
 							Name: "openapi",
-							Type: "dir",
+							Type: TypeDir,
 						},
 						{
 							Name: "proto",
-							Type: "dir",
+							Type: TypeDir,
 						},
 					},
 				},
 				{
 					Name: "application",
-					Type: "dir",
+					Type: TypeDir,
 				},
 				{
 					Name: "cmd",
-					Type: "dir",
+					Type: TypeDir,
 					SubObjects: []*Object{
 						{
 							Name: NamePlaceholder,
-							Type: "dir",
+							Type: TypeDir,
 							SubObjects: []*Object{
 								{
 									Name:     "main.go",
-									Type:     "file",
+									Type:     TypeFile,
 									Template: templates.MainTemplate,
 								},
 								{
 									Name:     "main_test.go",
-									Type:     "file",
+									Type:     TypeFile,
 									Template: templates.MainTestTemplate,
 								},
 							},
@@ -110,60 +106,60 @@ func getObjectMap() []*Object {
 				},
 				{
 					Name: "docker",
-					Type: "dir",
+					Type: TypeDir,
 					SubObjects: []*Object{
 						{
 							Name:     "Dockerfile",
-							Type:     "file",
+							Type:     TypeFile,
 							Template: templates.DockerfileTemplate,
 						},
 						{
 							Name:     "Dockerfile.dev",
-							Type:     "file",
+							Type:     TypeFile,
 							Template: templates.DockerfileDevTemplate,
 						},
 					},
 				},
 				{
 					Name: "domain",
-					Type: "dir",
+					Type: TypeDir,
 				},
 				{
 					Name: "infrastructure",
-					Type: "dir",
+					Type: TypeDir,
 					SubObjects: []*Object{
 						{
 							Name: "transport",
-							Type: "dir",
+							Type: TypeDir,
 							SubObjects: []*Object{
 								{
 									Name: "http",
-									Type: "dir",
+									Type: TypeDir,
 								},
 								{
 									Name: "grpc",
-									Type: "dir",
+									Type: TypeDir,
 								},
 								{
 									Name: "amqp",
-									Type: "dir",
+									Type: TypeDir,
 								},
 							},
 						},
 						{
 							Name: "repositories",
-							Type: "dir",
+							Type: TypeDir,
 						},
 					},
 				},
 				{
 					Name:     "docker-compose.yml",
-					Type:     "file",
+					Type:     TypeFile,
 					Template: templates.DockerComposeTemplate,
 				},
 				{
 					Name:     "go.mod",
-					Type:     "file",
+					Type:     TypeFile,
 					Template: templates.GoModTemplate,
 				},
 			},
@@ -188,9 +184,9 @@ func (o *Object) Build(config *Config) error {
 	log.Printf("Generating %s ", o.Name)
 	var err error
 	switch o.Type {
-	case "file":
+	case TypeFile:
 		err = o.generateFile(config)
-	case "dir":
+	case TypeDir:
 		log.Println("Making directory", o.Name)
 		err = os.MkdirAll(o.Name, os.ModePerm)
 	}
