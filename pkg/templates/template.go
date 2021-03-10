@@ -72,8 +72,7 @@ services:
 volumes:
    {{.Name}}_db_data: {}
 networks:
-   {{.Name}}:
-     name: {{.Name}}_network`)
+   {{.Name}}_network:`)
 }
 
 /*DockerfileDevTemplate stub for generic docker-compose.yml*/
@@ -123,47 +122,57 @@ func GinTemplate() []byte {
 	return []byte(`package main
 
 import (
-	"fmt"
-	"log"
-	"time"
+  "fmt"
+  "io"
+  "log"
+  "os"
+  "time"
 
   "github.com/gin-contrib/cors"
   "github.com/gin-gonic/gin"
   "github.com/joho/godotenv"
 )
-  
+
+var router *gin.Engine
+
 func main() {
-  router := gin.New()
+  router = gin.New()
 
-	router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
-		return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
-			param.ClientIP,
-			param.TimeStamp.Format(time.RFC1123),
-			param.Method,
-			param.Path,
-			param.Request.Proto,
-			param.StatusCode,
-			param.Latency,
-			param.Request.UserAgent(),
-			param.ErrorMessage,
-		)
-	}))
-	router.Use(gin.Recovery())
+  router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
+    return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
+      param.ClientIP,
+      param.TimeStamp.Format(time.RFC1123),
+      param.Method,
+      param.Path,
+      param.Request.Proto,
+      param.StatusCode,
+      param.Latency,
+      param.Request.UserAgent(),
+      param.ErrorMessage,
+    )
+  }))
+  logFile, err := os.OpenFile("{{.Name}}.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
-	config := cors.Config{
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
-		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}
-	config.AllowAllOrigins = true
-	router.Use(cors.Default())
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+  gin.DefaultWriter = io.MultiWriter(os.Stdout, logFile)
+  router.Use(gin.Recovery())
+
+  config := cors.Config{
+    AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
+    AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+    AllowCredentials: true,
+    MaxAge:           12 * time.Hour,
+  }
+  registerRoutes()
+  config.AllowAllOrigins = true
+  router.Use(cors.Default())
+  err = godotenv.Load()
+  if err != nil {
+    log.Fatal("Error loading .env file")
+  }
   log.Fatal(router.Run(":8080"))
 }
+
+func registerRoutes() {}
 `)
 }
 
