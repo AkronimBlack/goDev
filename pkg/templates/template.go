@@ -161,9 +161,9 @@ func main() {
     AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
     AllowCredentials: true,
     MaxAge:           12 * time.Hour,
+    AllowAllOrigins:  true,
   }
   registerRoutes()
-  config.AllowAllOrigins = true
   router.Use(cors.New(config))
   err = godotenv.Load()
   if err != nil {
