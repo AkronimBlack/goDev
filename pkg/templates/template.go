@@ -164,7 +164,7 @@ func main() {
   }
   registerRoutes()
   config.AllowAllOrigins = true
-  router.Use(cors.Default())
+  router.Use(cors.New(config))
   err = godotenv.Load()
   if err != nil {
     log.Fatal("Error loading .env file")
