@@ -31,8 +31,9 @@ var wizCmd = &cobra.Command{
 	Long:  `Add-on to the scaffold generator that will let you customize your generated project.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		answers := struct {
-			ProjectName   string `json:"project_name"`
-			HTTPFramework string `survey:"http_framework" json:"http_framework"`
+			ProjectName   string   `json:"project_name"`
+			HTTPFramework string   `survey:"http_framework" json:"http_framework"`
+			Database      []string `survey:"database"`
 		}{}
 
 		// perform the questions
@@ -59,6 +60,15 @@ var qs = []*survey.Question{
 		Prompt: &survey.Select{
 			Message: "Choose a http framework:",
 			Options: wizard.HTTPFrameworks(),
+			Default: wizard.DefaultHTTPFramework(),
+		},
+	},
+	{
+		Name: "database",
+		Prompt: &survey.MultiSelect{
+			Message: `Choose a database adapater (you can always add more later):
+NOTE: gorm is used as an ORM and coosing one or more adapters will pull gorm as well`,
+			Options: wizard.DatabaseAdapters(),
 			Default: wizard.DefaultHTTPFramework(),
 		},
 	},

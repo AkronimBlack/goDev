@@ -12,6 +12,10 @@ const (
 	ginFramework     = "gin"
 	gorillaFramework = "gorilla"
 	noFramework      = "none"
+
+	mysqlAdapter    = "mysql"
+	postgresAdapter = "postgres"
+	sqliteAdapter   = "sqlite"
 )
 
 var templateMap = map[string]func() []byte{
@@ -33,9 +37,18 @@ func HTTPFrameworks() []string {
 	return []string{ginFramework, gorillaFramework, noFramework}
 }
 
+//DatabaseAdapters list of available database adapters
+func DatabaseAdapters() []string {
+	return []string{mysqlAdapter, postgresAdapter, sqliteAdapter}
+}
+
 //DefaultHTTPFramework list of available framework templates
 func DefaultHTTPFramework() string {
 	return ginFramework
+}
+
+func DefaultDatabaseAdapter() string {
+	return mysqlAdapter
 }
 
 func Execute(opts *Options) {
