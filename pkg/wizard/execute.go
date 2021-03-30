@@ -156,11 +156,6 @@ func getObjectMap() []*appgenerator.Object {
 							Type:     appgenerator.TypeFile,
 							Template: getTemplate("Dockerfile"),
 						},
-						{
-							Name:     "Dockerfile.dev",
-							Type:     appgenerator.TypeFile,
-							Template: getTemplate("Dockerfile.dev"),
-						},
 					},
 				},
 				{
@@ -196,9 +191,18 @@ func getObjectMap() []*appgenerator.Object {
 					},
 				},
 				{
+					Name: "logs",
+					Type: appgenerator.TypeDir,
+				},
+				{
 					Name:     "docker-compose.yml",
 					Type:     appgenerator.TypeFile,
 					Template: getTemplate("docker-compose.yml"),
+				},
+				{
+					Name:     "Dockerfile",
+					Type:     appgenerator.TypeFile,
+					Template: getTemplate("Dockerfile.dev"),
 				},
 				{
 					Name:     "go.mod",

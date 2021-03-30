@@ -43,7 +43,7 @@ func DockerComposeTemplate() []byte {
 services:
    {{.Name}}:
       container_name: {{.Name}}
-      build: ./docker/Dockerfile.dev
+      build: ./
       ports:
         - 8080:8080
       volumes:
@@ -82,7 +82,7 @@ RUN apk update && apk upgrade && apk add bash
 WORKDIR /app
 COPY ./ /app
 RUN go mod download
-ENTRYPOINT go run main.go
+ENTRYPOINT go run cmd/{{.Name}}/main.go
 	`)
 }
 
@@ -151,7 +151,9 @@ func main() {
       param.ErrorMessage,
     )
   }))
-  logFile, err := os.OpenFile("{{.Name}}.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+  logFile, err := os.OpenFile("logs/{{.Name}}.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
+  buildDependencies()
 
   gin.DefaultWriter = io.MultiWriter(os.Stdout, logFile)
   router.Use(gin.Recovery())
@@ -173,6 +175,8 @@ func main() {
 }
 
 func registerRoutes() {}
+
+func buildDependencies(){}
 `)
 }
 
