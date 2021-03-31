@@ -192,3 +192,83 @@ func GitIgnoreTemplate() []byte {
 /vendor
 .env`)
 }
+
+func MigrateTemplate() []byte {
+	return []byte(`package repositories
+
+func Migrate(conn *DatabaseConnection) error {
+  var err error
+  return err
+}`)
+}
+
+func ConnectionTemplate() []byte {
+	return []byte(`package repositories
+
+  import (
+    "fmt"
+    "log"
+  
+    "github.com/asseco-voice/pusher/domain/models"
+    "gorm.io/driver/mysql"
+    "gorm.io/gorm"
+  )
+
+func NewDatabaseConnection(driver, user, password, hostname, port, database string, debug bool) *DatabaseConnection {
+  dsn := fmt.Sprintf("%s:%s@(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", user, password, hostname, port, database)
+
+  if driver == "postgres" {
+    dsn = fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable", hostname, port, user, database, password)
+  }
+
+  db, err := gorm.Open(mysql.Open(dsn))
+
+  if err != nil {
+    log.Println("Unable to connect to database")
+    log.Panic(err.Error())
+  }
+
+  if debug {
+    return NewDatabaseConnectionWithDB(db.Debug())
+  }
+  return NewDatabaseConnectionWithDB(db)
+}
+
+// NewDatabaseConnection constructor for DatabaseConnection
+func NewDatabaseConnectionWithDB(db *gorm.DB) *DatabaseConnection {
+  return &DatabaseConnection{
+    db: db,
+  }
+}
+
+// DatabaseConnection ....
+type DatabaseConnection struct {
+  db *gorm.DB
+}
+
+//GetConnection returns new gorm.DB connection. 
+func (r *DatabaseConnection) GetConnection() *gorm.DB {
+  //return r.db.Session(&gorm.Session{FullSaveAssociations: true})
+  return r.db
+}
+
+//AddWith append preloads to the query
+func (r *DatabaseConnection) AddWith(db *gorm.DB, with []string) *gorm.DB {
+  for _, w := range with {
+    db = db.Preload(w)
+  }
+  return db
+}
+
+//GetConnectionWithPreload get db connection with preloads
+func (r *DatabaseConnection) GetConnectionWithPreload(with []string) *gorm.DB {
+  if with == nil {
+    with = make([]string, 0)
+  }
+  db := r.GetConnection()
+  for _, w := range with {
+    db = db.Preload(w)
+  }
+  return db
+}`)
+}

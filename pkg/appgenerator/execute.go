@@ -61,42 +61,51 @@ type Config struct {
 func getObjectMap() []*Object {
 	return []*Object{
 		{
-			Name: NamePlaceholder,
-			Type: TypeDir,
+			Name:    NamePlaceholder,
+			Type:    TypeDir,
+			Renders: true,
 			SubObjects: []*Object{
 				{
-					Name: "api",
-					Type: TypeDir,
+					Name:    "api",
+					Type:    TypeDir,
+					Renders: true,
 					SubObjects: []*Object{
 						{
-							Name: "openapi",
-							Type: TypeDir,
+							Name:    "openapi",
+							Renders: true,
+							Type:    TypeDir,
 						},
 						{
-							Name: "proto",
-							Type: TypeDir,
+							Name:    "proto",
+							Renders: true,
+							Type:    TypeDir,
 						},
 					},
 				},
 				{
-					Name: "application",
-					Type: TypeDir,
+					Name:    "application",
+					Renders: true,
+					Type:    TypeDir,
 				},
 				{
-					Name: "cmd",
-					Type: TypeDir,
+					Name:    "cmd",
+					Renders: true,
+					Type:    TypeDir,
 					SubObjects: []*Object{
 						{
-							Name: NamePlaceholder,
-							Type: TypeDir,
+							Name:    NamePlaceholder,
+							Renders: true,
+							Type:    TypeDir,
 							SubObjects: []*Object{
 								{
 									Name:     "main.go",
+									Renders:  true,
 									Type:     TypeFile,
 									Template: templates.MainTemplate,
 								},
 								{
 									Name:     "main_test.go",
+									Renders:  true,
 									Type:     TypeFile,
 									Template: templates.MainTestTemplate,
 								},
@@ -105,60 +114,72 @@ func getObjectMap() []*Object {
 					},
 				},
 				{
-					Name: "docker",
-					Type: TypeDir,
+					Name:    "docker",
+					Renders: true,
+					Type:    TypeDir,
 					SubObjects: []*Object{
 						{
 							Name:     "Dockerfile",
+							Renders:  true,
 							Type:     TypeFile,
 							Template: templates.DockerfileTemplate,
 						},
 						{
 							Name:     "Dockerfile.dev",
+							Renders:  true,
 							Type:     TypeFile,
 							Template: templates.DockerfileDevTemplate,
 						},
 					},
 				},
 				{
-					Name: "domain",
-					Type: TypeDir,
+					Name:    "domain",
+					Renders: true,
+					Type:    TypeDir,
 				},
 				{
-					Name: "infrastructure",
-					Type: TypeDir,
+					Name:    "infrastructure",
+					Renders: true,
+					Type:    TypeDir,
 					SubObjects: []*Object{
 						{
-							Name: "transport",
-							Type: TypeDir,
+							Name:    "transport",
+							Renders: true,
+							Type:    TypeDir,
 							SubObjects: []*Object{
 								{
-									Name: "http",
-									Type: TypeDir,
+									Name:    "http",
+									Renders: true,
+									Type:    TypeDir,
 								},
 								{
-									Name: "grpc",
-									Type: TypeDir,
+									Name:    "grpc",
+									Renders: true,
+									Type:    TypeDir,
 								},
 								{
-									Name: "amqp",
-									Type: TypeDir,
+									Name:    "amqp",
+									Renders: true,
+									Type:    TypeDir,
 								},
 							},
 						},
 						{
-							Name: "repositories",
-							Type: TypeDir,
+							Name:    "repositories",
+							Renders: true,
+							Type:    TypeDir,
 						},
 					},
 				},
 				{
 					Name:     "docker-compose.yml",
+					Renders:  true,
 					Type:     TypeFile,
 					Template: templates.DockerComposeTemplate,
 				},
 				{
 					Name:     "go.mod",
+					Renders:  true,
 					Type:     TypeFile,
 					Template: templates.GoModTemplate,
 				},
@@ -176,6 +197,8 @@ type Object struct {
 	Type       string
 	SubObjects []*Object
 	Template   func() []byte
+	Evaluate   func(*Object)
+	Renders    bool
 }
 
 //Build start building
@@ -183,24 +206,30 @@ func (o *Object) Build(config *Config) error {
 	o.replacePlaceholder(config)
 	log.Printf("Generating %s ", o.Name)
 	var err error
-	switch o.Type {
-	case TypeFile:
-		err = o.generateFile(config)
-	case TypeDir:
-		log.Println("Making directory", o.Name)
-		err = os.MkdirAll(o.Name, os.ModePerm)
+	if o.Evaluate != nil {
+		o.Evaluate(o)
 	}
-	if err != nil {
-		return err
-	}
-	if o.SubObjects == nil {
-		return nil
-	}
-	for _, x := range o.SubObjects {
-		x.Name = fmt.Sprintf("%s/%s", o.Name, x.Name)
-		err = x.Build(config)
+	log.Printf("Should I render: %v", o.Renders)
+	if o.Renders {
+		switch o.Type {
+		case TypeFile:
+			err = o.generateFile(config)
+		case TypeDir:
+			log.Println("Making directory", o.Name)
+			err = os.MkdirAll(o.Name, os.ModePerm)
+		}
 		if err != nil {
 			return err
+		}
+		if o.SubObjects == nil {
+			return nil
+		}
+		for _, x := range o.SubObjects {
+			x.Name = fmt.Sprintf("%s/%s", o.Name, x.Name)
+			err = x.Build(config)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
