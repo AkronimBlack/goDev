@@ -1,7 +1,9 @@
 package templates
 
 var depMap = map[string]func() []byte{
-	"gin": GinDep,
+	"gin":    GinDep,
+	"mysql":  GormDep,
+	"logrus": LogrusDep,
 }
 
 func GetDependency(item string) []byte {

@@ -34,6 +34,7 @@ var wizCmd = &cobra.Command{
 			ProjectName   string   `json:"project_name"`
 			HTTPFramework string   `survey:"http_framework" json:"http_framework"`
 			Database      []string `survey:"database"`
+			Logrus        bool     `survey:"logrus"`
 		}{}
 
 		// perform the questions
@@ -44,7 +45,7 @@ var wizCmd = &cobra.Command{
 		}
 		common.LogJson(answers)
 		nameData := common.ExtractNameData(common.SanitizeName(answers.ProjectName))
-		wizard.Execute(wizard.NewOptions(nameData.ProjectName, nameData.Maintainer, answers.HTTPFramework, answers.ProjectName, answers.Database))
+		wizard.Execute(wizard.NewOptions(nameData.ProjectName, nameData.Maintainer, answers.HTTPFramework, answers.ProjectName, answers.Database, answers.Logrus))
 	},
 }
 
@@ -70,6 +71,12 @@ var qs = []*survey.Question{
 NOTE: gorm is used as an ORM and coosing one or more adapters will pull gorm as well`,
 			Options: wizard.DatabaseAdapters(),
 			Default: wizard.DefaultHTTPFramework(),
+		},
+	},
+	{
+		Name: "logrus",
+		Prompt: &survey.Confirm{
+			Message: "Use logrus for loging?",
 		},
 	},
 }

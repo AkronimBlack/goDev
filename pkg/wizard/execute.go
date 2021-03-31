@@ -63,13 +63,14 @@ func Execute(opts *Options) {
 	}
 }
 
-func NewOptions(name, Maintainer, framework, fullName string, databaseAdapters []string) *Options {
+func NewOptions(name, Maintainer, framework, fullName string, databaseAdapters []string, logrus bool) *Options {
 	return &Options{
 		Name:             name,
 		Maintainer:       Maintainer,
 		Framework:        framework,
 		FullName:         fullName,
 		DatabaseAdapters: databaseAdapters,
+		Logrus:           logrus,
 	}
 }
 
@@ -79,6 +80,7 @@ type Options struct {
 	Framework        string   `json:"framework"`
 	FullName         string   `json:"full_name"`
 	DatabaseAdapters []string `json:"database_adapters"`
+	Logrus           bool     `json:"logrus"`
 }
 
 func getTemplate(file string) func() []byte {
@@ -101,6 +103,20 @@ require (
 	if executeOptions.Framework != "" {
 
 		base = append(base, templates.GetDependency(executeOptions.Framework)...)
+		base = append(base, []byte("\n")...)
+	}
+
+	if executeOptions.DatabaseAdapters != nil {
+
+		for _, v := range executeOptions.DatabaseAdapters {
+			base = append(base, templates.GetDependency(v)...)
+		}
+		base = append(base, []byte("\n")...)
+	}
+
+	if executeOptions.Logrus {
+		base = append(base, templates.GetDependency("logrus")...)
+		base = append(base, []byte("\n")...)
 	}
 
 	return append(base, []byte(`    
