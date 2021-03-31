@@ -41,33 +41,29 @@ func DockerComposeTemplate() []byte {
 	return []byte(`version: '3.3'
 
 services:
-   {{.Name}}:
-      container_name: {{.Name}}
-      build: ./
-      ports:
-        - 8080:8080
-      volumes:
-        - ./:/app
-      depends_on:
-        - {{.Name}}_db
-      networks:
-        - {{.Name}}_network
+  {{.Name}}:
+    container_name: {{.Name}}
+    build: ./
+    ports:
+      - 8080:8080
+    volumes:
+      - ./:/app
+    depends_on:
+      - {{.Name}}_db
+    networks:
+      - {{.Name}}_network
 
 
-   {{.Name}}_db:
-      image: mysql:5.7
-      volumes:
-        - {{.Name}}_db_data:/var/lib/mysql
-      restart: always
-      environment:
-        MYSQL_ROOT_PASSWORD: secret
-        MYSQL_DATABASE: {{.Name}}
-        MYSQL_USER: user
-        MYSQL_PASSWORD: user
-      ports: 
-        - 3306:3306
-      networks:
-        - {{.Name}}_network
+  {{.Name}}_db:
+    image: mariadb:10.5.4
+    container_name: {{.Name}}_db
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: {{.Name}}
+    ports:
+      - 3306:3306
+    networks:
+      - {{.Name}}_network
 
 volumes:
    {{.Name}}_db_data: {}
