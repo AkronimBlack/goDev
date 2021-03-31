@@ -133,6 +133,11 @@ import (
 var router *gin.Engine
 
 func main() {
+  
+  err := godotenv.Load()
+  if err != nil {
+    log.Fatal("Error loading .env file")
+  }
   router = gin.New()
 
   router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
@@ -164,10 +169,6 @@ func main() {
   }
   registerRoutes()
   router.Use(cors.New(config))
-  err = godotenv.Load()
-  if err != nil {
-    log.Fatal("Error loading .env file")
-  }
   log.Fatal(router.Run(fmt.Sprintf("%s:%s", bootOptions.Host, bootOptions.Port)))
 }
 
