@@ -31,6 +31,9 @@ var templateMap = map[string]func() []byte{
 	".gitignore":         templates.GitIgnoreTemplate,
 	"migrate.go":         templates.MigrateTemplate,
 	"connection.go":      templates.ConnectionTemplate,
+	"bootOptions.go":     templates.BootOptionsTemplate,
+	"constants.go":       templates.ConstantsTemplate,
+	"helpers.go":         templates.HelpersTemplate,
 }
 
 var executeOptions *Options
@@ -258,6 +261,31 @@ func getObjectMap(opts *Options) []*appgenerator.Object {
 									},
 								},
 							},
+						},
+					},
+				},
+				{
+					Name:    "shared",
+					Type:    appgenerator.TypeDir,
+					Renders: true,
+					SubObjects: []*appgenerator.Object{
+						{
+							Name:     "bootOptions.go",
+							Type:     appgenerator.TypeFile,
+							Renders:  true,
+							Template: getTemplate("bootOptions.go"),
+						},
+						{
+							Name:     "constants.go",
+							Type:     appgenerator.TypeFile,
+							Renders:  true,
+							Template: getTemplate("constants.go"),
+						},
+						{
+							Name:     "helpers.go",
+							Type:     appgenerator.TypeFile,
+							Renders:  true,
+							Template: getTemplate("helpers.go"),
 						},
 					},
 				},

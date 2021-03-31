@@ -128,6 +128,7 @@ import (
   "os"
   "time"
 
+  "github.com/asseco-voice/pusher/shared"
   "github.com/gin-contrib/cors"
   "github.com/gin-gonic/gin"
   "github.com/joho/godotenv"
@@ -152,7 +153,7 @@ func main() {
     )
   }))
   logFile, err := os.OpenFile("logs/{{.Name}}.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-
+  bootOptions := shared.NewBootOptionsFromEnv()
   buildDependencies()
 
   gin.DefaultWriter = io.MultiWriter(os.Stdout, logFile)
@@ -171,7 +172,7 @@ func main() {
   if err != nil {
     log.Fatal("Error loading .env file")
   }
-  log.Fatal(router.Run(":8080"))
+  log.Fatal(router.Run(fmt.Sprintf("%s:%s", bootOptions.Host, bootOptions.Port)))
 }
 
 func registerRoutes() {}
@@ -269,5 +270,152 @@ func (r *DatabaseConnection) GetConnectionWithPreload(with []string) *gorm.DB {
     db = db.Preload(w)
   }
   return db
+}`)
+}
+
+func BootOptionsTemplate() []byte {
+	return []byte(`package shared
+  
+
+import "strings"
+
+var (
+  host = "0.0.0.0"
+  port = "8080"
+
+  brokerHost   = "172.0.0.1"
+  brokerPort   = "61616"
+  brokerUser   = "admin"
+  brokerPass   = "admin"
+  brokerTopics = []string{}
+
+  databaseHost     = "{{.Name}}_db"
+  databasePort     = "3306"
+  databaseUser     = "root"
+  databasePassword = "secret"
+  databaseName     = "{{.Name}}"
+  databaseDebug    = false
+  databaseDriver   = "mysql"
+  databaseSeed     = false
+)
+
+type BootOptions struct {
+  Host string 
+  Port string 
+
+  BrokerHost   string   
+  BrokerPort   string   
+  BrokerUser   string   
+  BrokerPass   string   
+  BrokerTopics []string 
+
+  DatabaseHost     string
+  DatabasePort     string
+  DatabaseUser     string
+  DatabasePassword string
+  DatabaseName     string
+  DatabaseDebug    bool  
+  DatabaseDriver   string
+  DatabaseSeed     bool  
+}
+
+/*
+NewBootOptionsFromEnv returns an instance of BootOptions with fields populated from env variables
+*/
+func NewBootOptionsFromEnv() *BootOptions {
+
+  brokerTopicsString := GetEnvString(BrokerTopics, strings.Join(brokerTopics, ","))
+  brokerTopics = strings.Split(brokerTopicsString, ",")
+
+  return &BootOptions{
+    Host:             GetEnvString(Host, host),
+    Port:             GetEnvString(Port, port),
+    BrokerHost:       GetEnvString(BrokerHost, brokerHost),
+    BrokerPort:       GetEnvString(BrokerPort, brokerPort),
+    BrokerUser:       GetEnvString(BrokerUser, brokerUser),
+    BrokerPass:       GetEnvString(BrokerPass, brokerPass),
+    BrokerTopics:     brokerTopics,
+    DatabaseHost:     GetEnvString(DatabaseHost, databaseHost),
+    DatabasePort:     GetEnvString(DatabasePort, databasePort),
+    DatabaseUser:     GetEnvString(DatabaseUser, databaseUser),
+    DatabasePassword: GetEnvString(DatabasePass, databasePassword),
+    DatabaseName:     GetEnvString(DatabaseName, databaseName),
+    DatabaseDebug:    GetEnvBool(DebugDatabase, databaseDebug),
+    DatabaseDriver:   GetEnvString(DatabaseDriver, databaseDriver),
+    DatabaseSeed:     GetEnvBool(DatabaseSeed, databaseSeed),
+  }
+}`)
+}
+
+func ConstantsTemplate() []byte {
+	return []byte(`package shared
+
+const (
+  AppName   = "APP_NAME"
+  IamKeyUrl = "IAM_KEY_URL"
+
+  Host = "HOST"
+  Port = "PORT"
+
+  BrokerType   = "BROKER_TYPE"
+  BrokerHost   = "BROKER_HOST"
+  BrokerPort   = "BROKER_PORT"
+  BrokerUser   = "BROKER_USER"
+  BrokerPass   = "BROKER_PASS"
+  BrokerTopics = "BROKER_TOPICS"
+
+  DatabaseDriver = "DB_DRIVER"
+  DatabaseHost   = "DB_HOST"
+  DatabasePort   = "DB_PORT"
+  DatabaseUser   = "DB_USER"
+  DatabaseName   = "DB_NAME"
+  DatabasePass   = "DB_PASS"
+  DebugDatabase  = "DB_DEBUG"
+  DatabaseSeed   = "DB_SEED"
+)`)
+}
+
+func HelpersTemplate() []byte {
+	return []byte(`package shared
+
+
+import (
+  "log"
+  "os"
+  "strconv"
+  "strings"
+)
+
+func GetEnvString(key, defaultValue string) string {
+  if x := os.Getenv(key); x != "" {
+    return x
+  }
+  return defaultValue
+}
+
+func GetEnvInt(key string, defaultValue int32) int32 {
+  if x := os.Getenv(key); x != "" {
+    v, err := strconv.ParseInt(x, 10, 32)
+    if err != nil {
+      log.Panicf("Can not convert string to int32 %s", err.Error())
+    }
+    return int32(v)
+  }
+  return defaultValue
+}
+
+func GetEnvBool(key string, defaultValue bool) bool {
+  if x := os.Getenv(key); x != "" {
+    v, err := strconv.ParseBool(x)
+    if err != nil {
+      log.Panicf("Can not convert string to int32 %s", err.Error())
+    }
+    return v
+  }
+  return defaultValue
+}
+
+func PrettyXml(flatxml string) string {
+  return strings.ReplaceAll(flatxml, ">", ">\n")
 }`)
 }
