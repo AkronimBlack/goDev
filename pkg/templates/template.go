@@ -209,7 +209,6 @@ func ConnectionTemplate() []byte {
     "fmt"
     "log"
   
-    "github.com/asseco-voice/pusher/domain/models"
     "gorm.io/driver/mysql"
     "gorm.io/gorm"
   )
