@@ -48,27 +48,27 @@ func DefaultHTTPFramework() string {
 
 func Execute(opts *Options) {
 	executeOptions = opts
-	config := NewConfig(opts.Name, opts.FullName, opts.Maintainer, opts)
+	config := NewConfig(opts.ProjectName, opts.FullName, opts.Maintainer, opts)
 	common.LogJson(config)
 	for _, x := range getObjectMap() {
 		x.Build(config)
 	}
 }
 
-func NewOptions(name, Maintainer, framework, fullName string) *Options {
+func NewOptions(projectName, Maintainer, framework, fullName string) *Options {
 	return &Options{
-		Name:       name,
-		Maintainer: Maintainer,
-		Framework:  framework,
-		FullName:   fullName,
+		ProjectName: projectName,
+		Maintainer:  Maintainer,
+		Framework:   framework,
+		FullName:    fullName,
 	}
 }
 
 type Options struct {
-	Name       string `json:"project_name"`
-	Maintainer string `json:"maintainer"`
-	Framework  string `json:"framework"`
-	FullName   string `json:"full_name"`
+	ProjectName string `json:"project_name"`
+	Maintainer  string `json:"maintainer"`
+	Framework   string `json:"framework"`
+	FullName    string `json:"full_name"`
 }
 
 func getTemplate(file string) func() []byte {
@@ -107,134 +107,6 @@ require (
 	return append(base, []byte(`    
 	)`)...)
 
-}
-
-func getObjectMap() []*Object {
-	return []*Object{
-		{
-			Name: NamePlaceholder,
-			Type: TypeDir,
-			SubObjects: []*Object{
-				{
-					Name: "api",
-					Type: TypeDir,
-					SubObjects: []*Object{
-						{
-							Name: "openapi",
-							Type: TypeDir,
-						},
-						{
-							Name: "proto",
-							Type: TypeDir,
-						},
-					},
-				},
-				{
-					Name: "application",
-					Type: TypeDir,
-				},
-				{
-					Name: "cmd",
-					Type: TypeDir,
-					SubObjects: []*Object{
-						{
-							Name: NamePlaceholder,
-							Type: TypeDir,
-							SubObjects: []*Object{
-								{
-									Name:     "main.go",
-									Type:     TypeFile,
-									Template: getTemplate("main.go"),
-								},
-								{
-									Name:     "main_test.go",
-									Type:     TypeFile,
-									Template: getTemplate("main_test.go"),
-								},
-							},
-						},
-					},
-				},
-				{
-					Name: "docker",
-					Type: TypeDir,
-					SubObjects: []*Object{
-						{
-							Name:     "Dockerfile",
-							Type:     TypeFile,
-							Template: getTemplate("Dockerfile"),
-						},
-					},
-				},
-				{
-					Name: "domain",
-					Type: TypeDir,
-				},
-				{
-					Name: "infrastructure",
-					Type: TypeDir,
-					SubObjects: []*Object{
-						{
-							Name: "transport",
-							Type: TypeDir,
-							SubObjects: []*Object{
-								{
-									Name: "http",
-									Type: TypeDir,
-								},
-								{
-									Name: "grpc",
-									Type: TypeDir,
-								},
-								{
-									Name: "amqp",
-									Type: TypeDir,
-								},
-							},
-						},
-						{
-							Name: "repositories",
-							Type: TypeDir,
-						},
-					},
-				},
-				{
-					Name: "logs",
-					Type: TypeDir,
-				},
-				{
-					Name:     "docker-compose.yml",
-					Type:     TypeFile,
-					Template: getTemplate("docker-compose.yml"),
-				},
-				{
-					Name:     "Dockerfile",
-					Type:     TypeFile,
-					Template: getTemplate("Dockerfile.dev"),
-				},
-				{
-					Name:     "go.mod",
-					Type:     TypeFile,
-					Template: getTemplate("go.mod"),
-				},
-				{
-					Name:     ".env",
-					Type:     TypeFile,
-					Template: getTemplate(".env"),
-				},
-				{
-					Name:     ".env.example",
-					Type:     TypeFile,
-					Template: getTemplate(".env"),
-				},
-				{
-					Name:     ".gitignore",
-					Type:     TypeFile,
-					Template: getTemplate(".gitignore"),
-				},
-			},
-		},
-	}
 }
 
 //NewConfig config constructor

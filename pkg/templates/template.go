@@ -38,41 +38,41 @@ func main() {
 
 /*DockerComposeTemplate stub for generic docker-compose.yml*/
 func DockerComposeTemplate() []byte {
-	return []byte(`version: '3.3'
+	return []byte(`version: '3.5'
 
 services:
-   {{.Name}}:
-      container_name: {{.Name}}
+   {{.ProjectName}}:
+      container_name: {{.ProjectName}}
       build: ./
       ports:
         - 8080:8080
       volumes:
         - ./:/app
       depends_on:
-        - {{.Name}}_db
+        - {{.ProjectName}}_db
       networks:
-        - {{.Name}}_network
+        - {{.ProjectName}}_network
 
 
-   {{.Name}}_db:
+   {{.ProjectName}}_db:
       image: mysql:5.7
       volumes:
-        - {{.Name}}_db_data:/var/lib/mysql
+        - {{.ProjectName}}_db_data:/var/lib/mysql
       restart: always
       environment:
         MYSQL_ROOT_PASSWORD: secret
-        MYSQL_DATABASE: {{.Name}}
+        MYSQL_DATABASE: {{.ProjectName}}
         MYSQL_USER: user
         MYSQL_PASSWORD: user
       ports: 
         - 3306:3306
       networks:
-        - {{.Name}}_network
+        - {{.ProjectName}}_network
 
 volumes:
-   {{.Name}}_db_data: {}
+   {{.ProjectName}}_db_data: {}
 networks:
-   {{.Name}}_network:`)
+   {{.ProjectName}}_network:`)
 }
 
 /*DockerfileDevTemplate stub for generic docker-compose.yml*/
@@ -82,7 +82,7 @@ RUN apk update && apk upgrade && apk add bash
 WORKDIR /app
 COPY ./ /app
 RUN go mod download
-ENTRYPOINT go run cmd/{{.Name}}/main.go
+ENTRYPOINT go run cmd/{{.ProjectName}}/main.go
 	`)
 }
 
@@ -93,11 +93,11 @@ LABEL maintainer="{{.Maintainer}}"
 WORKDIR /app
 COPY . .
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o {{.Name}}
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o {{.ProjectName}}
 FROM alpine
-COPY --from=builder /app/{{.Name}} .
+COPY --from=builder /app/{{.ProjectName}} .
 EXPOSE 8080
-ENTRYPOINT ["./{{.Name}}"]
+ENTRYPOINT ["./{{.ProjectName}}"]
 	`)
 }
 
@@ -133,10 +133,32 @@ import (
   "github.com/joho/godotenv"
 )
 
-var router *gin.Engine
+var (
+  router *gin.Engine
+)
 
 func main() {
+  buildDependencies()
+  err := godotenv.Load()
+  if err != nil {
+    log.Println("Could not load .env file")
+  }
+  log.Fatal(httpRouter().Run(":8080"))
+}
+
+func httpRouter() *gin.Engine {
+  if router != nil {
+    return router
+  }
   router = gin.New()
+  config := cors.Config{
+    AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
+    AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+    AllowCredentials: true,
+    MaxAge:           12 * time.Hour,
+    AllowAllOrigins:  true,
+  }
+  router.Use(cors.New(config))
 
   router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
     return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
@@ -151,33 +173,18 @@ func main() {
       param.ErrorMessage,
     )
   }))
-  logFile, err := os.OpenFile("logs/{{.Name}}.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
-  buildDependencies()
-
+  logFile, err := os.OpenFile("logs/{{.ProjectName}}.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+  if err != nil {
+    log.Panic(err.Error())
+  }
   gin.DefaultWriter = io.MultiWriter(os.Stdout, logFile)
   router.Use(gin.Recovery())
 
-  config := cors.Config{
-    AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
-    AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
-    AllowCredentials: true,
-    MaxAge:           12 * time.Hour,
-    AllowAllOrigins:  true,
-  }
-  registerRoutes()
-  router.Use(cors.New(config))
-  err = godotenv.Load()
-  if err != nil {
-    log.Fatal("Error loading .env file")
-  }
-  log.Fatal(router.Run(":8080"))
+  return router
 }
 
-func registerRoutes() {}
-
-func buildDependencies(){}
-`)
+func buildDependencies() {}`)
 }
 
 func EnvTemplate() []byte {

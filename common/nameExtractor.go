@@ -6,7 +6,7 @@ import (
 )
 
 type NameData struct {
-	Platform    string `json:"platform"`
+	Location    string `json:"location"`
 	Maintainer  string `json:"maintainer"`
 	ProjectName string `json:"project_name"`
 }
@@ -18,20 +18,19 @@ type NameData struct {
 func ExtractNameData(fullname string) *NameData {
 	var maintainer string
 	var projectName string
-	var platform string
+	var location string
 
 	parts := strings.Split(fullname, "/")
 	if len(parts) > 1 {
-		fullname = parts[len(parts)-1]
-	}
-	if len(parts) == 3 {
-		maintainer = parts[1]
-		platform = parts[0]
-		projectName = strings.Join(parts[2:], "/")
+		projectName = parts[len(parts)-1]
+		parts = parts[:len(parts)-1]
+		maintainer = parts[len(parts)-1]
+		parts = parts[:len(parts)-1]
+		location = strings.Join(parts, "/")
 	}
 
 	return &NameData{
-		Platform:    platform,
+		Location:    location,
 		Maintainer:  maintainer,
 		ProjectName: projectName,
 	}
